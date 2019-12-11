@@ -16,8 +16,7 @@
 
 package net.virtualviking.b3inject;
 
-import net.virtualviking.b3inject.handlers.ApacheEgressHandler;
-import net.virtualviking.b3inject.handlers.JettyIngressHandler;
+import net.virtualviking.b3inject.handlers.*;
 
 import java.lang.instrument.Instrumentation;
 import java.util.ArrayList;
@@ -29,14 +28,27 @@ public class Agent {
         List<HandlerRule> rules = new ArrayList<>();
 
         // Ingress rules
-        rules.add(new HandlerRule("org.eclipse.jetty.server.handler.HandlerWrapper.handle(java.lang.String,org.eclipse.jetty.server.Request,"+
+        rules.add(new HandlerRule("org.eclipse.jetty.server.handler.HandlerWrapper.handle(" +
+                "java.lang.String,org.eclipse.jetty.server.Request,"+
                 "javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)",
                 new JettyIngressHandler()));
+        rules.add(new HandlerRule("javax.servlet.http.HttpServlet.service(" +
+                "javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)",
+                new SpringIngressHandler()));
 
         // Egress rules
         rules.add(new HandlerRule("org.apache.http.*.doExecute(" +
                 "org.apache.http.HttpHost,org.apache.http.HttpRequest,org.apache.http.protocol.HttpContext)",
-                new ApacheEgressHandler()));
+                new GenericEgressHandler(1, "setHeader")));
+        rules.add(new HandlerRule("org.springframework.http.client.*.executeInternal(" +
+                "org.springframework.http.HttpHeaders)",
+                new GenericEgressHandler(0, "set")));
+        rules.add(new HandlerRule("sun.net.www.http.HttpClient.writeRequests(" +
+                "sun.net.www.MessageHeader,sun.net.www.http.PosterOutputStream)",
+                new GenericEgressHandler(0, "set")));
+        rules.add(new HandlerRule("sun.net.www.http.HttpClient.writeRequests(" +
+                "sun.net.www.MessageHeader,sun.net.www.http.PosterOutputStream,boolean)",
+                new GenericEgressHandler(0, "set")));
         inst.addTransformer(new B3InjectTransformer(rules));
     }
 }

@@ -60,7 +60,9 @@ public class B3InjectTransformer implements ClassFileTransformer {
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
                             ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
         try {
-            ClassPool pool = ClassPool.getDefault();
+8            ClassPool pool = ClassPool.getDefault();
+            pool.appendClassPath(new LoaderClassPath(loader));
+            pool.appendSystemPath();
             CtClass clazz = pool.makeClass(new ByteArrayInputStream(classfileBuffer));
 
             //System.err.println(clazz.getName());
@@ -94,12 +96,12 @@ public class B3InjectTransformer implements ClassFileTransformer {
                 try {
                     touched |= instrument(behavior, absolute ? fullMethodName : behavior.getName(), fullMethodName, index, rule.getHandler().isIngress());
                 } catch (CannotCompileException e) {
-                    System.err.println("Instrumentation failed: " + e.getMessage());
+                    System.err.println("Instrumentation failed: " + e.toString());
                 }
             }
             return touched ? clazz.toBytecode() : null;
         } catch (Exception e) {
-            System.err.println("Instrumentation failed: " + e.getMessage());
+            System.err.println("Instrumentation failed: " + e.toString());
             throw new RuntimeException("Error instrumenting class " + className);
         }
     }

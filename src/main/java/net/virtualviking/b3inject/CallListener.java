@@ -59,8 +59,9 @@ public class CallListener {
         if(ctx == null) {
             return;
         }
-        if(handlerIndex < handlers.size()) {
+        if(handlerIndex < handlers.size() && !ctx.isEgressHandled()) {
             handlers.get(handlerIndex).before(parameters, ctx);
+            ctx.setEgressHandled(true);
         }
         System.out.println("B3 headers forwarded:");
         for(Map.Entry<String, String> e : ctx.getB3Headers().entrySet()) {
@@ -73,6 +74,7 @@ public class CallListener {
             Context ctx = threadData.get();
             if(ctx != null) {
                 handlers.get(handlerIndex).after(ctx);
+                ctx.setEgressHandled(false);
             }
         }
     }
