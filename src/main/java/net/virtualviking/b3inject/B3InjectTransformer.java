@@ -60,7 +60,7 @@ public class B3InjectTransformer implements ClassFileTransformer {
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined,
                             ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
         try {
-8            ClassPool pool = ClassPool.getDefault();
+            ClassPool pool = ClassPool.getDefault();
             pool.appendClassPath(new LoaderClassPath(loader));
             pool.appendSystemPath();
             CtClass clazz = pool.makeClass(new ByteArrayInputStream(classfileBuffer));
