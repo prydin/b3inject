@@ -15,8 +15,11 @@ The code is pretty simple. When classes are loaded, the methods that deal with i
 ## What frameworks does it support?
 We currently support Dropwizard, Spring, SpringBoot and Apache HTTP Client. By spefifying ```-Db3inject.instrumentcore=true``` on the command line, we can also support calls made through the native Java HTTP client. However, if this option is used, you must also specify the ```-Xbootclassloader``` to include the path th the b3inject agent JAR.
 
+## What versions of Java does it support?
+It should support anything from Java 8 to Java 13 although it has not yet been tested with every version. Please report any strange behavior and I will have a look at it.
+
 ## Usage
-java -javaagent:/path/b3inject-1.0-SNAPSHOT-jar-with-dependencies.jar -jar mycode.jar
+```java -javaagent:/path/b3inject-1.0-SNAPSHOT-jar-with-dependencies.jar -jar mycode.jar```
 
 ## TODO
 * Support for more frameworks
