@@ -1,5 +1,5 @@
 /*
- *  Copyright 2017 Pontus Rydin
+ *  Copyright 2019 Pontus Rydin
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ import java.util.List;
 public class Agent {
 
     public static void premain(String agentArgs, Instrumentation inst) throws Exception {
+        boolean instumentCore = "true".equalsIgnoreCase(System.getenv("b3inject.instrumentcore"));
         List<HandlerRule> rules = new ArrayList<>();
 
         // Ingress rules
@@ -43,12 +44,14 @@ public class Agent {
         rules.add(new HandlerRule("org.springframework.http.client.*.executeInternal(" +
                 "org.springframework.http.HttpHeaders)",
                 new GenericEgressHandler(0, "set")));
-        rules.add(new HandlerRule("sun.net.www.http.HttpClient.writeRequests(" +
-                "sun.net.www.MessageHeader,sun.net.www.http.PosterOutputStream)",
-                new GenericEgressHandler(0, "set")));
-        rules.add(new HandlerRule("sun.net.www.http.HttpClient.writeRequests(" +
-                "sun.net.www.MessageHeader,sun.net.www.http.PosterOutputStream,boolean)",
-                new GenericEgressHandler(0, "set")));
+        if(instumentCore) {
+            rules.add(new HandlerRule("sun.net.www.http.HttpClient.writeRequests(" +
+                    "sun.net.www.MessageHeader,sun.net.www.http.PosterOutputStream)",
+                    new GenericEgressHandler(0, "set")));
+            rules.add(new HandlerRule("sun.net.www.http.HttpClient.writeRequests(" +
+                    "sun.net.www.MessageHeader,sun.net.www.http.PosterOutputStream,boolean)",
+                    new GenericEgressHandler(0, "set")));
+        }
         inst.addTransformer(new B3InjectTransformer(rules));
     }
 }
