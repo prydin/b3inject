@@ -25,7 +25,7 @@ import java.util.List;
 public class Agent {
 
     public static void premain(String agentArgs, Instrumentation inst) throws Exception {
-        boolean instumentCore = "true".equalsIgnoreCase(System.getenv("b3inject.instrumentcore"));
+        boolean instumentCore = "true".equalsIgnoreCase(System.getProperty("b3inject.instrumentcore"));
         List<HandlerRule> rules = new ArrayList<>();
 
         // Ingress rules

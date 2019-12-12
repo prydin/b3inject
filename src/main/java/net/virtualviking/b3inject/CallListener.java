@@ -31,14 +31,16 @@ public class CallListener {
     }
 
     public static void onIngressEntry(String method, String fullMethodName, int handlerIndex, Object[] parameters) {
-        System.out.println(method + " " + handlerIndex);
+        Logger.debug("Entered " + fullMethodName);
         if(handlerIndex < handlers.size()) {
             Context ctx = new Context();
             handlers.get(handlerIndex).before(parameters, ctx);
             threadData.set(ctx);
-            System.out.println("B3 headers captured:");
-            for(Map.Entry<String, String> e : ctx.getB3Headers().entrySet()) {
-                System.out.println(e.getKey() + "->" + e.getValue());
+            if(Logger.isDebugEnabled()) {
+                System.out.println("B3 headers captured:");
+                for (Map.Entry<String, String> e : ctx.getB3Headers().entrySet()) {
+                    System.out.println(e.getKey() + "->" + e.getValue());
+                }
             }
         }
     }
@@ -54,18 +56,20 @@ public class CallListener {
     }
 
     public static void onEgressEntry(String method, String fullMethodName, int handlerIndex, Object[] parameters) {
-        System.out.println(method + " " + handlerIndex);
+        Logger.debug("Entered " + fullMethodName);
         Context ctx = threadData.get();
-        if(ctx == null) {
+        if (ctx == null) {
             return;
         }
-        if(handlerIndex < handlers.size() && !ctx.isEgressHandled()) {
+        if (handlerIndex < handlers.size() && !ctx.isEgressHandled()) {
             handlers.get(handlerIndex).before(parameters, ctx);
             ctx.setEgressHandled(true);
         }
-        System.out.println("B3 headers forwarded:");
-        for(Map.Entry<String, String> e : ctx.getB3Headers().entrySet()) {
-            System.out.println(e.getKey() + "->" + e.getValue());
+        if (Logger.isDebugEnabled()) {
+            System.out.println("B3 headers forwarded:");
+            for (Map.Entry<String, String> e : ctx.getB3Headers().entrySet()) {
+                System.out.println(e.getKey() + "->" + e.getValue());
+            }
         }
     }
 

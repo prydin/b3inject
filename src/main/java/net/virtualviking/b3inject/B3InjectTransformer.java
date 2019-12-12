@@ -92,16 +92,16 @@ public class B3InjectTransformer implements ClassFileTransformer {
                 }
                 int index = CallListener.registerHandler(rule.getHandler());
 
-                System.err.println("Instrumenting method: " + fullMethodName + " mods=" + behavior.getModifiers());
+                Logger.debug("Instrumenting method: " + fullMethodName + " mods=" + behavior.getModifiers());
                 try {
                     touched |= instrument(behavior, absolute ? fullMethodName : behavior.getName(), fullMethodName, index, rule.getHandler().isIngress());
                 } catch (CannotCompileException e) {
-                    System.err.println("Instrumentation failed: " + e.toString());
+                    Logger.debug("Instrumentation failed: " + e.toString());
                 }
             }
             return touched ? clazz.toBytecode() : null;
         } catch (Exception e) {
-            System.err.println("Instrumentation failed: " + e.toString());
+            Logger.debug("Instrumentation failed: " + e.toString());
             throw new RuntimeException("Error instrumenting class " + className);
         }
     }
