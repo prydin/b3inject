@@ -10,7 +10,7 @@ For more details, please refer to this discussion: https://github.com/openzipkin
 Yes, there are many ways you can do this through application frameworks such as Spring, SpringBoot and Dropwizard. However, they all require changes to application code. A Java agent allows you to add propagation of the B3 headers without any changes to the Java code.
 
 ## How does it work?
-The code is pretty simple. When classes are loaded, the methods that deal with either incoming or outgoing calls are slightly modified to store the values of the B3 headers in thread-local memory. Whenever an outgoing call is made from that thread, the same technique is used to add a small piece of code that adds the saved B3 headers to any outgoing call.
+The code is pretty simple. When classes are loaded, the methods that deal with incoming calls are slightly modified to store the values of the B3 headers in thread-local memory. Whenever an outgoing call is made from that thread, the same technique is used to add a small piece of code that adds the saved B3 headers to any outgoing call.
 
 ## What frameworks does it support?
 We currently support Dropwizard, Spring, SpringBoot and Apache HTTP Client. By spefifying ```-Db3inject.instrumentcore=true``` on the command line, we can also support calls made through the native Java HTTP client. However, if this option is used, you must also specify the ```-Xbootclassloader``` to include the path th the b3inject agent JAR.
