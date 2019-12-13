@@ -1,0 +1,45 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: quoter
+  labels:
+    app: quoter
+
+spec:
+  type: LoadBalancer
+  ports:
+    - targetPort: 50051
+      port: 50051
+      protocol: TCP
+      name: http
+
+  selector:
+    app: quoter
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: quoter
+  labels:
+    app: demo-quoter
+    env: prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: quoter
+      env: prod
+  template:
+    metadata:
+      name: quoter
+      labels:
+        app: quoter
+        env: prod
+
+    spec:
+      containers:
+        - name: quoter
+          image: gcr.io/b3inject/quoter
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 50051
