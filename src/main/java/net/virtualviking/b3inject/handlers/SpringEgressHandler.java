@@ -16,27 +16,28 @@
 package net.virtualviking.b3inject.handlers;
 
 import net.bytebuddy.agent.builder.AgentBuilder;
-import static net.bytebuddy.matcher.ElementMatchers.*;
 import net.bytebuddy.asm.Advice;
 import net.virtualviking.b3inject.Matchers;
 
-public class JettyIngressHandler {
+import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
+import static net.bytebuddy.matcher.ElementMatchers.named;
+
+public class SpringEgressHandler {
     @Advice.OnMethodEnter
-    public static void enter(final @Advice.AllArguments Object[] args) {
-        GenericIngressHandler.enter(args[1], "getHeader");
+    public static void enter(final @Advice.Origin String origin, final @Advice.This Object self, final @Advice.AllArguments Object[] args) {
+        GenericEgressHandler.enter(args[0], "set");
     }
 
     @Advice.OnMethodExit
     public static void exit() {
-        GenericIngressHandler.exit();
+        GenericEgressHandler.exit();
     }
 
     public static AgentBuilder buildAgent(AgentBuilder b) {
-        return b.type(named("org.eclipse.jetty.server.handler.HandlerWrapper"))
+        return b.type(hasSuperType(named("org.springframework.http.client.AbstractClientHttpRequest")))
                 .transform((builder, type, classLoader, module) ->
                         builder
-                                .visit(Advice.to(JettyIngressHandler.class).on(new Matchers.WildcardMethodMatcher(
-                                        "handle(java.lang.String,org.eclipse.jetty.server.Request,"+
-                                        "javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)"))));
+                                .visit(Advice.to(SpringEgressHandler.class).on(new Matchers.WildcardMethodMatcher(
+                                        "executeInternal(org.springframework.http.HttpHeaders)"))));
     }
 }

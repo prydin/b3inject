@@ -19,6 +19,23 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Context {
+    public static class Factory {
+        private static ThreadLocal<Context> context = new ThreadLocal<>();
+
+        public static Context newContext() {
+            Context ctx = new Context();
+            context.set(ctx);
+            return ctx;
+        }
+
+        public static Context getContext() {
+            return context.get();
+        }
+
+        public static void clearContext() {
+            context.set(null);
+        }
+    }
     private final Map<String, String> b3Headers = new HashMap<>();
 
     private boolean egressHandled;

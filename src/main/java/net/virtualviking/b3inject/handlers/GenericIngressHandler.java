@@ -13,7 +13,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-
 package net.virtualviking.b3inject.handlers;
 
 import net.virtualviking.b3inject.Constants;
@@ -22,37 +21,29 @@ import net.virtualviking.b3inject.Logger;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Enumeration;
+import java.util.Map;
 
-public class GenericEgressHandler {
+public class GenericIngressHandler {
     public static void enter(Object rq, String methodName) {
-        Context context = Context.Factory.getContext();
-        if(context == null) {
-            return;
-        }
-        if(context.isEgressHandled()) {
-            return;
-        }
-        context.setEgressHandled(true);
+        Context context = Context.Factory.newContext();
         try {
-            Logger.debug("EGRESS: Passing B3 headers: " + Logger.mapToString(context.getB3Headers()));
-            Method m = rq.getClass().getMethod(methodName, new Class[]{String.class, String.class});
+            Map<String, String> headers = context.getB3Headers();
+            Method m = rq.getClass().getMethod(methodName, String.class);
             for(String h : Constants.b3Headers) {
-                String value = context.getB3Headers().get(h);
-                if (value == null) {
-                    continue;
+                @SuppressWarnings("unchecked")
+                String s = (String) m.invoke(rq, h);
+                if(s != null) {
+                    headers.put(h, s);
                 }
-                m.invoke(rq, h, value);
             }
-        } catch (NoSuchMethodException|IllegalAccessException| InvocationTargetException e){
+            Logger.debug("INGRESS: Captured B3 headers: " + Logger.mapToString(headers));
+        } catch (NoSuchMethodException|IllegalAccessException|InvocationTargetException e) {
             e.printStackTrace();
         }
     }
 
     public static void exit() {
-        Context context = Context.Factory.getContext();
-        if(context == null) {
-            return;
-        }
-        context.setEgressHandled(false);
+        Context.Factory.clearContext();
     }
 }

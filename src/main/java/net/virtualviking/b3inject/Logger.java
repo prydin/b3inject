@@ -15,6 +15,9 @@
  */
 package net.virtualviking.b3inject;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
 /**
  * We don't want to drag in any of the larger logging packages into the Java Agent, so we use this tiny one instead.
  */
@@ -29,5 +32,12 @@ public class Logger {
 
     public static boolean isDebugEnabled() {
         return debugEnabled;
+    }
+
+    public static String mapToString(Map<?, ?> map) {
+        String mapAsString = map.keySet().stream()
+                .map(key -> key + "=" + map.get(key))
+                .collect(Collectors.joining(", ", "{", "}"));
+        return mapAsString;
     }
 }

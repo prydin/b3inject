@@ -15,41 +15,28 @@
  */
 package net.virtualviking.b3inject.handlers;
 
-import net.virtualviking.b3inject.CallHandler;
-import net.virtualviking.b3inject.Constants;
-import net.virtualviking.b3inject.Context;
+import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.asm.Advice;
+import net.virtualviking.b3inject.Matchers;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Enumeration;
-import java.util.Map;
+import static net.bytebuddy.matcher.ElementMatchers.named;
 
-public class SpringIngressHandler implements CallHandler {
-    @Override
-    public void before(Object[] args, Context context) {
-        try {
-            Map<String, String> headers = context.getB3Headers();
-            Object rq = args[0];
-            Method m = rq.getClass().getMethod("getHeaders", new Class[]{String.class});
-            for(String h : Constants.b3Headers) {
-                Enumeration<String> e = (Enumeration<String>) m.invoke(rq, h);
-                if(!e.hasMoreElements()) {
-                    continue;
-                }
-                headers.put(h, e.nextElement());
-            }
-
-        } catch (NoSuchMethodException|IllegalAccessException|InvocationTargetException e) {
-            e.printStackTrace();
-        }
+public class SpringIngressHandler {
+    @Advice.OnMethodEnter
+    public static void enter(final @Advice.AllArguments Object[] args) {
+        GenericIngressHandler.enter(args[0], "getHeader");
     }
 
-    @Override
-    public void after(Context context) {
+    @Advice.OnMethodExit
+    public static void exit() {
+        GenericIngressHandler.exit();
     }
 
-    @Override
-    public boolean isIngress() {
-        return true;
+    public static AgentBuilder buildAgent(AgentBuilder b) {
+        return b.type(named("javax.servlet.http.HttpServlet"))
+                .transform((builder, type, classLoader, module) ->
+                        builder
+                                .visit(Advice.to(SpringIngressHandler.class).on(new Matchers.WildcardMethodMatcher(
+                                        "service(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)"))));
     }
 }

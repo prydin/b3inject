@@ -22,7 +22,20 @@ public class FrontendResource {
     @GET
     public Quote quote(@PathParam("symbol") String symbol) {
         return client
-                .target("quote")
+                .target(quoterRoot)
+                .path("quote")
+                .queryParam("symbol", symbol)
+                .request(MediaType.APPLICATION_JSON)
+                .get(Quote.class);
+    }
+
+    @Path("request_callback/{symbol}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @GET
+    public Quote requestCallback(@PathParam("symbol") String symbol) {
+        return client
+                .target(quoterRoot)
+                .path("quote_callback")
                 .queryParam("symbol", symbol)
                 .request(MediaType.APPLICATION_JSON)
                 .get(Quote.class);
@@ -38,5 +51,13 @@ public class FrontendResource {
                 .path("symbols")
                 .request(MediaType.APPLICATION_JSON)
                 .get(List.class);
+    }
+
+    @Path("callback")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @POST
+    @SuppressWarnings("Unchecked")
+    public void callback(Quote quote) {
+       System.out.println("Received callback: " + quote);
     }
 }

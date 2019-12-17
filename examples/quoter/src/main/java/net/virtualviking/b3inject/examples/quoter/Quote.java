@@ -16,6 +16,9 @@ public class Quote {
         this.price = price;
     }
 
+    public Quote() {
+    }
+
     @JsonProperty
     public String getSymbol() {
         return symbol;
@@ -24,5 +27,15 @@ public class Quote {
     @JsonProperty
     public double getPrice() {
         return price;
+    }
+
+    @JsonProperty
+    public void setSymbol(String symbol) {
+        this.symbol = symbol;
+    }
+
+    @JsonProperty
+    public void setPrice(double price) {
+        this.price = price;
     }
 }
