@@ -73,9 +73,10 @@ public class Agent {
 
     public static void premain(String agentArgs, Instrumentation inst) throws Exception {
         instrument(JettyIngressHandler.buildAgent(newBuilder()), inst);
-        instrument(SpringIngressHandler.buildAgent(newBuilder()), inst);
+        instrument(ServletIngressHandler.buildAgent(newBuilder()), inst);
         instrument(SpringEgressHandler.buildAgent(newBuilder()), inst);
         instrument(ApacheEgressHandler.buildAgent(newBuilder()), inst);
         instrument(JaxRsEgressHandler.buildAgent(newBuilder()), inst);
+     //   instrument(ServletFilterHandler.buildAgent(newBuilder()), inst);
     }
 }

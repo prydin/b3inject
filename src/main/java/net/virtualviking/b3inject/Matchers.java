@@ -59,7 +59,7 @@ public class Matchers {
             }
             sb.append(')');
             boolean match =  filter.accept(new File(sb.toString()));
-            Logger.debug(sb.toString() + "==" + filter.toString() + ": " + match);
+            // Logger.debug(sb.toString() + "==" + filter.toString() + ": " + match);
             return match;
         }
     }

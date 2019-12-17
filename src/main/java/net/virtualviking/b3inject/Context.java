@@ -40,6 +40,8 @@ public class Context {
 
     private boolean egressHandled;
 
+    private boolean ingressHandled;
+
     public Context() {
     }
 
@@ -53,5 +55,13 @@ public class Context {
 
     public void setEgressHandled(boolean egressHandled) {
         this.egressHandled = egressHandled;
+    }
+
+    public boolean isIngressHandled() {
+        return ingressHandled;
+    }
+
+    public void setIngressHandled(boolean ingressHandled) {
+        this.ingressHandled = ingressHandled;
     }
 }
