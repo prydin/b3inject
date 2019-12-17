@@ -1,0 +1,10 @@
+server:
+  applicationConnectors:
+    - type: http
+      port: 50050
+  adminConnectors:
+    - type: http
+      port: 50150
+
+backendPort: 50051
+backendHost: "localhost"

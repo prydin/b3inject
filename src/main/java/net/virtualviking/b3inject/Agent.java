@@ -16,42 +16,66 @@
 
 package net.virtualviking.b3inject;
 
+import net.bytebuddy.ByteBuddy;
+import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.description.type.TypeDescription;
+import net.bytebuddy.dynamic.DynamicType;
+import net.bytebuddy.dynamic.scaffold.TypeValidation;
+import net.bytebuddy.utility.JavaModule;
 import net.virtualviking.b3inject.handlers.*;
 
 import java.lang.instrument.Instrumentation;
-import java.util.ArrayList;
-import java.util.List;
+
+import static net.bytebuddy.matcher.ElementMatchers.none;
 
 public class Agent {
 
-    public static void premain(String agentArgs, Instrumentation inst) throws Exception {
-        boolean instumentCore = "true".equalsIgnoreCase(System.getProperty("b3inject.instrumentcore"));
-        List<HandlerRule> rules = new ArrayList<>();
-
-        // Ingress rules
-        rules.add(new HandlerRule("org.eclipse.jetty.server.handler.HandlerWrapper.handle(" +
-                "java.lang.String,org.eclipse.jetty.server.Request,"+
-                "javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)",
-                new JettyIngressHandler()));
-        rules.add(new HandlerRule("javax.servlet.http.HttpServlet.service(" +
-                "javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)",
-                new SpringIngressHandler()));
-
-        // Egress rules
-        rules.add(new HandlerRule("org.apache.http.*.doExecute(" +
-                "org.apache.http.HttpHost,org.apache.http.HttpRequest,org.apache.http.protocol.HttpContext)",
-                new GenericEgressHandler(1, "setHeader")));
-        rules.add(new HandlerRule("org.springframework.http.client.*.executeInternal(" +
-                "org.springframework.http.HttpHeaders)",
-                new GenericEgressHandler(0, "set")));
-        if(instumentCore) {
-            rules.add(new HandlerRule("sun.net.www.http.HttpClient.writeRequests(" +
-                    "sun.net.www.MessageHeader,sun.net.www.http.PosterOutputStream)",
-                    new GenericEgressHandler(0, "set")));
-            rules.add(new HandlerRule("sun.net.www.http.HttpClient.writeRequests(" +
-                    "sun.net.www.MessageHeader,sun.net.www.http.PosterOutputStream,boolean)",
-                    new GenericEgressHandler(0, "set")));
+    private static class DebugListener implements AgentBuilder.Listener {
+        @Override
+        public void onDiscovery(String s, ClassLoader classLoader, JavaModule javaModule, boolean b) {
         }
-        inst.addTransformer(new B3InjectTransformer(rules));
+
+        @Override
+        public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule javaModule, boolean b, DynamicType dynamicType) {
+            Logger.debug("Transforming class: " + typeDescription.getActualName());
+        }
+
+        @Override
+        public void onIgnored(TypeDescription typeDescription, ClassLoader classLoader, JavaModule javaModule, boolean b) {
+        }
+
+        @Override
+        public void onError(String s, ClassLoader classLoader, JavaModule javaModule, boolean b, Throwable throwable) {
+            Logger.debug("Error transforming class " + s + ": " + throwable.toString());
+        }
+
+        @Override
+        public void onComplete(String s, ClassLoader classLoader, JavaModule javaModule, boolean b) {
+        }
+    }
+
+    private static AgentBuilder newBuilder() {
+        AgentBuilder agentBuilder = new AgentBuilder.Default(new ByteBuddy().with(TypeValidation.DISABLED))
+                .disableClassFormatChanges()
+                .ignore(none());
+        return agentBuilder
+                .with(AgentBuilder.RedefinitionStrategy.RETRANSFORMATION)
+                .with(AgentBuilder.InitializationStrategy.NoOp.INSTANCE)
+                .with(AgentBuilder.TypeStrategy.Default.REDEFINE);
+    }
+
+    private static void instrument(AgentBuilder b, Instrumentation inst) {
+        if(Logger.isDebugEnabled()) {
+            b = b.with(new DebugListener());
+        }
+        b.installOn(inst);
+    }
+
+    public static void premain(String agentArgs, Instrumentation inst) throws Exception {
+        instrument(JettyIngressHandler.buildAgent(newBuilder()), inst);
+        instrument(SpringIngressHandler.buildAgent(newBuilder()), inst);
+        instrument(SpringEgressHandler.buildAgent(newBuilder()), inst);
+        instrument(ApacheEgressHandler.buildAgent(newBuilder()), inst);
+        instrument(JaxRsEgressHandler.buildAgent(newBuilder()), inst);
     }
 }
