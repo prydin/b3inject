@@ -25,6 +25,10 @@ import java.lang.reflect.Method;
 
 public class GenericEgressHandler {
     public static void enter(Object rq, String methodName) {
+        enter(rq, methodName, String.class, String.class);
+    }
+
+    public static void enter(Object rq, String methodName, Class<?>... argTypes) {
         Context context = Context.Factory.getContext();
         if(context == null) {
             return;
@@ -35,7 +39,7 @@ public class GenericEgressHandler {
         context.setEgressHandled(true);
         try {
             Logger.debug("EGRESS: Passing B3 headers: " + Logger.mapToString(context.getB3Headers()));
-            Method m = rq.getClass().getMethod(methodName, new Class[]{String.class, String.class});
+            Method m = rq.getClass().getMethod(methodName, argTypes);
             for(String h : Constants.b3Headers) {
                 String value = context.getB3Headers().get(h);
                 if (value == null) {

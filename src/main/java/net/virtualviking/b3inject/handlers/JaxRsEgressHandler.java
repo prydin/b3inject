@@ -26,6 +26,8 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
 import static net.bytebuddy.matcher.ElementMatchers.named;
@@ -55,15 +57,29 @@ public class JaxRsEgressHandler {
     }
 
     public static AgentBuilder buildAgent(final AgentBuilder b) {
-        return b.type(hasSuperType(named("javax.ws.rs.client.ClientBuilder")))
+        return b.type(hasSuperType(hasSuperType(named("javax.ws.rs.client.ClientBuilder"))))
                 .transform((builder, type, classLoader, module) ->
-                        builder.visit(Advice.to(JaxRsEgressHandler.class).on(new Matchers.WildcardMethodMatcher("build(*)"))));
+                        builder.visit(Advice.to(JaxRsEgressHandler.class)
+                                .on(new Matchers.WildcardMethodMatcher("build(*)"))))
+                .type(hasSuperType(named("javax.ws.rs.client.Invocation$Builder")))
+                .transform((builder, type, classLoader, loader) ->
+                        builder.visit(Advice.to(JaxRsEgressHandler.AsyncHandler.class).on(named("async"))));
     }
 
-
     @Advice.OnMethodEnter
-    public static void enter(final @Advice.Origin String origin, final @Advice.This Object thiz) {
-        final ClientBuilder builder = (ClientBuilder)thiz;
+    public static void enter(final @Advice.Origin String origin, final @Advice.This Object self) {
+        Logger.debug("Entering instrumentation on " + origin);
+        final ClientBuilder builder = (ClientBuilder)self;
         builder.register(B3HeadersRequestFilter.class);
+    }
+
+    public static class AsyncHandler {
+        // This handler is needed since the filter defined above will be executed in a separate thread
+        // for asynchronous calls.
+        @Advice.OnMethodEnter
+        public static void enter(final @Advice.Origin String origin, final @Advice.This Object self) {
+            Logger.debug("Entering instrumentation on " + origin);
+            GenericEgressHandler.enter(self, "header", String.class, Object.class);
+        }
     }
 }

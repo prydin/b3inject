@@ -18,11 +18,13 @@ package net.virtualviking.b3inject.handlers;
 import net.bytebuddy.agent.builder.AgentBuilder;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 import net.bytebuddy.asm.Advice;
+import net.virtualviking.b3inject.Logger;
 import net.virtualviking.b3inject.Matchers;
 
 public class JettyIngressHandler {
     @Advice.OnMethodEnter
-    public static void enter(final @Advice.AllArguments Object[] args) {
+    public static void enter(final @Advice.Origin String origin, final @Advice.AllArguments Object[] args) {
+        Logger.debug("Entering instrumentation on " + origin);
         GenericIngressHandler.enter(args[1], "getHeader");
     }
 
