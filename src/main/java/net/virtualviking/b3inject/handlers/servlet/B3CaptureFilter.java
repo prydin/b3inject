@@ -1,4 +1,4 @@
-package net.virtualviking.b3inject.handlers;
+package net.virtualviking.b3inject.handlers.servlet;
 
 import net.virtualviking.b3inject.Constants;
 import net.virtualviking.b3inject.Context;

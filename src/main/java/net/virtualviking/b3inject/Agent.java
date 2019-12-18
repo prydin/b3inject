@@ -16,16 +16,22 @@
 
 package net.virtualviking.b3inject;
 
+import jdk.internal.vm.annotation.ForceInline;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.agent.builder.AgentBuilder;
+import net.bytebuddy.asm.Advice;
 import net.bytebuddy.description.type.TypeDescription;
 import net.bytebuddy.dynamic.DynamicType;
 import net.bytebuddy.dynamic.scaffold.TypeValidation;
+import net.bytebuddy.implementation.bind.annotation.RuntimeType;
+import net.bytebuddy.implementation.bytecode.assign.Assigner;
+import net.bytebuddy.implementation.bytecode.assign.Assigner.Typing;
 import net.bytebuddy.utility.JavaModule;
 import net.virtualviking.b3inject.handlers.*;
 
 import java.lang.instrument.Instrumentation;
 
+import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.none;
 
 public class Agent {
@@ -46,7 +52,7 @@ public class Agent {
 
         @Override
         public void onError(String s, ClassLoader classLoader, JavaModule javaModule, boolean b, Throwable throwable) {
-            Logger.debug("Error transforming class " + s + ": " + throwable.toString());
+            // Logger.debug("Error transforming class " + s + ": " + throwable.toString());
         }
 
         @Override
@@ -77,6 +83,30 @@ public class Agent {
         instrument(SpringEgressHandler.buildAgent(newBuilder()), inst);
         instrument(ApacheEgressHandler.buildAgent(newBuilder()), inst);
         instrument(JaxRsEgressHandler.buildAgent(newBuilder()), inst);
-     //   instrument(ServletFilterHandler.buildAgent(newBuilder()), inst);
+      //  instrument(ServletFilterHandler.buildAgent(newBuilder()), inst);
+
+        // Some classloaders don't look at the system classloader. Hack them to do that!
+        newBuilder().type(named("org.eclipse.osgi.internal.loader.BundleLoader"))
+                .transform(new AgentBuilder.Transformer.ForAdvice()
+                    .advice(named("findClass"), ClassLoaderEnhancer.class.getName())).installOn(inst);
+    }
+
+    private static class ClassLoaderEnhancer {
+        @Advice.OnMethodExit(onThrowable = ClassNotFoundException.class)
+        public static void exit(
+                @Advice.Argument(0) String className,
+                @Advice.Return(typing = Assigner.Typing.DYNAMIC, readOnly = false) @RuntimeType Object value,
+                @Advice.Origin String origin,
+                @Advice.Thrown(readOnly = false) Throwable thrown) throws Throwable {
+            if(thrown != null) {
+                if(className.startsWith("net.virtualviking.b3inject")) {
+                    System.err.println("Attempting to load class: " + className);
+                    value = ClassLoader.getSystemClassLoader().loadClass(className);
+                    thrown = null;
+                } else {
+                    throw thrown;
+                }
+            }
+        }
     }
 }

@@ -23,7 +23,6 @@ import net.virtualviking.b3inject.Matchers;
 public class JettyIngressHandler {
     @Advice.OnMethodEnter
     public static void enter(final @Advice.AllArguments Object[] args) {
-        new B3CaptureFilter();
         GenericIngressHandler.enter(args[1], "getHeader");
     }
 
