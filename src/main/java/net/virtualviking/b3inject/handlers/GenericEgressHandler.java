@@ -40,6 +40,7 @@ public class GenericEgressHandler {
         try {
             Logger.debug("EGRESS: Passing B3 headers: " + Logger.mapToString(context.getB3Headers()));
             Method m = rq.getClass().getMethod(methodName, argTypes);
+            m.setAccessible(true);
             for(String h : Constants.b3Headers) {
                 String value = context.getB3Headers().get(h);
                 if (value == null) {

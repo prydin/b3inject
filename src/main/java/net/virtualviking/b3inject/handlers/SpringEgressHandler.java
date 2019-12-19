@@ -17,11 +17,16 @@ package net.virtualviking.b3inject.handlers;
 
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
+import net.bytebuddy.description.method.MethodDescription;
+import net.virtualviking.b3inject.Constants;
+import net.virtualviking.b3inject.Context;
 import net.virtualviking.b3inject.Logger;
 import net.virtualviking.b3inject.Matchers;
 
-import static net.bytebuddy.matcher.ElementMatchers.hasSuperType;
-import static net.bytebuddy.matcher.ElementMatchers.named;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import static net.bytebuddy.matcher.ElementMatchers.*;
 
 public class SpringEgressHandler {
     @Advice.OnMethodEnter
@@ -40,6 +45,42 @@ public class SpringEgressHandler {
                 .transform((builder, type, classLoader, module) ->
                         builder
                                 .visit(Advice.to(SpringEgressHandler.class).on(new Matchers.WildcardMethodMatcher(
-                                        "executeInternal(org.springframework.http.HttpHeaders)"))));
+                                        "executeInternal(org.springframework.http.HttpHeaders)"))))
+                .type(hasSuperType(named("org.springframework.web.reactive.function.client.WebClient$RequestHeadersSpec")))
+                .transform((builder, type, classLoader, module) ->
+                        builder
+                                .visit(Advice.to(WebFluxHandler.class).on(isConstructor())));
+    }
+
+    public static class WebFluxHandler {
+        public static void enter(Object rq) {
+            Context context = Context.Factory.getContext();
+            if(context == null) {
+                return;
+            }
+            if(context.isEgressHandled()) {
+                return;
+            }
+            context.setEgressHandled(true);
+            try {
+                Logger.debug("EGRESS: Passing B3 headers: " + Logger.mapToString(context.getB3Headers()));
+                Method m = rq.getClass().getMethod("header", String.class, String[].class);
+                m.setAccessible(true);
+                for(String h : Constants.b3Headers) {
+                    String value = context.getB3Headers().get(h);
+                    if (value == null) {
+                        continue;
+                    }
+                    m.invoke(rq, h, new String[] { value });
+                }
+            } catch (NoSuchMethodException|IllegalAccessException| InvocationTargetException e){
+                e.printStackTrace();
+            }
+        }
+        @Advice.OnMethodExit
+        public static void exit(final @Advice.Origin String origin, @Advice.This Object self) {
+            Logger.debug("Entering instrumentation on " + origin);
+            WebFluxHandler.enter(self);
+        }
     }
 }

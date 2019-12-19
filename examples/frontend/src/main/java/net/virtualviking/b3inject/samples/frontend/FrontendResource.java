@@ -45,6 +45,20 @@ public class FrontendResource {
         return f.get();
     }
 
+    @Path("request_callback_sw/{symbol}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @GET
+    public Quote requestCallbacSpringWeb(@PathParam("symbol") String symbol) throws InterruptedException, ExecutionException {
+        Future<Quote> f = client
+                .target(quoterRoot)
+                .path("quote_callback_sw")
+                .queryParam("symbol", symbol)
+                .request(MediaType.APPLICATION_JSON)
+                .async()
+                .get(Quote.class);
+        return f.get();
+    }
+
     @Path("symbols")
     @Produces(MediaType.APPLICATION_JSON)
     @GET

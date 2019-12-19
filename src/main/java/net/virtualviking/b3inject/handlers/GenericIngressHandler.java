@@ -29,6 +29,7 @@ public class GenericIngressHandler {
         try {
             Map<String, String> headers = context.getB3Headers();
             Method m = rq.getClass().getMethod(methodName, String.class);
+            m.setAccessible(true);
             for(String h : Constants.b3Headers) {
                 @SuppressWarnings("unchecked")
                 String s = (String) m.invoke(rq, h);
