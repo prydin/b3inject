@@ -6,7 +6,7 @@ if [[ -z "${DEMO_REGISTRY}" ]]; then
 fi
 
 mkdir tmp
-cp ../../target/b3inject-1.0-SNAPSHOT-jar-with-dependencies.jar tmp
+cp ../../target/b3inject-1.0.1-jar-with-dependencies.jar tmp
 mvn clean install
 docker build -t $DEMO_REGISTRY/quoter .
 docker push $DEMO_REGISTRY/quoter

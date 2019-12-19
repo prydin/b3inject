@@ -24,7 +24,7 @@
     <groupId>net.virtualviking</groupId>
     <artifactId>b3inject</artifactId>
     <!-- packaging>pom</packaging -->
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0.1</version>
     <!-- modules>
         <module>examples/frontend</module>
         <module>examples/quoter</module>
