@@ -17,13 +17,15 @@ package net.virtualviking.b3inject.handlers;
 
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
+import net.virtualviking.b3inject.Logger;
 import net.virtualviking.b3inject.Matchers;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
 
-public class SpringIngressHandler {
+public class ServletIngressHandler {
     @Advice.OnMethodEnter
-    public static void enter(final @Advice.AllArguments Object[] args) {
+    public static void enter(final @Advice.Origin String origin, final @Advice.AllArguments Object[] args) {
+        Logger.debug("Entering instrumentation on " + origin);
         GenericIngressHandler.enter(args[0], "getHeader");
     }
 
@@ -36,7 +38,7 @@ public class SpringIngressHandler {
         return b.type(named("javax.servlet.http.HttpServlet"))
                 .transform((builder, type, classLoader, module) ->
                         builder
-                                .visit(Advice.to(SpringIngressHandler.class).on(new Matchers.WildcardMethodMatcher(
+                                .visit(Advice.to(ServletIngressHandler.class).on(new Matchers.WildcardMethodMatcher(
                                         "service(javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)"))));
     }
 }

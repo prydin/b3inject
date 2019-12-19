@@ -6,6 +6,8 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 @Path("/")
 public class FrontendResource {
@@ -32,13 +34,29 @@ public class FrontendResource {
     @Path("request_callback/{symbol}")
     @Produces(MediaType.APPLICATION_JSON)
     @GET
-    public Quote requestCallback(@PathParam("symbol") String symbol) {
-        return client
+    public Quote requestCallback(@PathParam("symbol") String symbol) throws InterruptedException, ExecutionException {
+        Future<Quote> f = client
                 .target(quoterRoot)
                 .path("quote_callback")
                 .queryParam("symbol", symbol)
                 .request(MediaType.APPLICATION_JSON)
+                .async()
                 .get(Quote.class);
+        return f.get();
+    }
+
+    @Path("request_callback_sw/{symbol}")
+    @Produces(MediaType.APPLICATION_JSON)
+    @GET
+    public Quote requestCallbacSpringWeb(@PathParam("symbol") String symbol) throws InterruptedException, ExecutionException {
+        Future<Quote> f = client
+                .target(quoterRoot)
+                .path("quote_callback_sw")
+                .queryParam("symbol", symbol)
+                .request(MediaType.APPLICATION_JSON)
+                .async()
+                .get(Quote.class);
+        return f.get();
     }
 
     @Path("symbols")

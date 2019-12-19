@@ -17,6 +17,7 @@ package net.virtualviking.b3inject.handlers;
 
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
+import net.virtualviking.b3inject.Logger;
 import net.virtualviking.b3inject.Matchers;
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
@@ -26,6 +27,7 @@ public class ApacheEgressHandler {
     private static class ZeroOffsetMethodEntry {
         @Advice.OnMethodEnter
         public static void enter(final @Advice.Origin String origin, final @Advice.This Object self, final @Advice.AllArguments Object[] args) {
+            Logger.debug("Entering instrumentation on " + origin);
             GenericEgressHandler.enter(args[0], "setHeader");
         }
 
@@ -38,6 +40,7 @@ public class ApacheEgressHandler {
     private static class OneOffsetMethodEntry {
         @Advice.OnMethodEnter
         public static void enter(final @Advice.Origin String origin, final @Advice.This Object self, final @Advice.AllArguments Object[] args) {
+            Logger.debug("Entering instrumentation on " + origin);
             GenericEgressHandler.enter(args[0], "setHeader");
         }
 

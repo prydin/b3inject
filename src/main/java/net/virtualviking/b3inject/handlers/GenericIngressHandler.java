@@ -21,7 +21,6 @@ import net.virtualviking.b3inject.Logger;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Enumeration;
 import java.util.Map;
 
 public class GenericIngressHandler {
@@ -30,6 +29,7 @@ public class GenericIngressHandler {
         try {
             Map<String, String> headers = context.getB3Headers();
             Method m = rq.getClass().getMethod(methodName, String.class);
+            m.setAccessible(true);
             for(String h : Constants.b3Headers) {
                 @SuppressWarnings("unchecked")
                 String s = (String) m.invoke(rq, h);
