@@ -28,6 +28,7 @@
     <!-- modules>
         <module>examples/frontend</module>
         <module>examples/quoter</module>
+        <module>examples/trader</module>
     </modules -->
 
     <properties>
@@ -57,6 +58,11 @@
             <artifactId>javax.servlet-api</artifactId>
             <version>3.1.0</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-api</artifactId>
+            <version>1.25.0</version>
         </dependency>
 
 

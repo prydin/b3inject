@@ -1,5 +1,11 @@
 package net.virtualviking.b3inject.samples.frontend;
 
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
+import net.virtualviking.b3inject.examples.trader.Status;
+import net.virtualviking.b3inject.examples.trader.TradeRequest;
+import net.virtualviking.b3inject.examples.trader.TraderGrpc;
+
 import javax.ws.rs.*;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -8,6 +14,7 @@ import javax.ws.rs.core.MediaType;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.logging.Logger;
 
 @Path("/")
 public class FrontendResource {
@@ -15,8 +22,19 @@ public class FrontendResource {
 
     private Client client = ClientBuilder.newClient();
 
-    public FrontendResource(String quoterHost, int quoterPort) {
+    private static final Logger logger = Logger.getLogger(FrontendResource.class.getName());
+
+    private final ManagedChannel channel;
+    private final TraderGrpc.TraderBlockingStub blockingStub;
+
+    public FrontendResource(String quoterHost, int quoterPort, String traderHost, int traderPort) {
         quoterRoot = "http://" + quoterHost + ":" + quoterPort + "/quoter";
+        this.channel = ManagedChannelBuilder.forAddress(traderHost, traderPort)
+                // Channels are secure by default (via SSL/TLS). For the example we disable TLS to avoid
+                // needing certificates.
+                .usePlaintext()
+                .build();
+        this.blockingStub = TraderGrpc.newBlockingStub(this.channel);
     }
 
     @Path("quote/{symbol}")
@@ -77,5 +95,17 @@ public class FrontendResource {
     @SuppressWarnings("Unchecked")
     public void callback(Quote quote) {
        System.out.println("Received callback: " + quote);
+    }
+
+    @Path("trade")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public boolean trade(@QueryParam("symbol") String symbol, @QueryParam("amount") int amount) {
+        TradeRequest rq = TradeRequest
+                .newBuilder()
+                .setAmount(amount)
+                .setSymbol(symbol)
+                .build();
+       return blockingStub.makeTrade(rq).getResult();
     }
 }

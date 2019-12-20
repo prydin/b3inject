@@ -11,6 +11,10 @@ public class FrontendConfig extends Configuration {
 
     int backendPort;
 
+    String traderHost;
+
+    int traderPort;
+
     @JsonProperty
     public String getBackendHost() {
         return backendHost;
@@ -30,4 +34,10 @@ public class FrontendConfig extends Configuration {
     public void setBackendPort(int backendPort) {
         this.backendPort = backendPort;
     }
+
+    @JsonProperty
+    public String getTraderHost() { return traderHost; }
+
+    @JsonProperty
+    public int getTraderPort() { return traderPort; }
 }

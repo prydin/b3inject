@@ -17,7 +17,11 @@ public class FrontendApplication extends Application<FrontendConfig> {
 
     @Override
     public void run(FrontendConfig frontendConfig, Environment environment) {
-        final FrontendResource resource = new FrontendResource(frontendConfig.backendHost, frontendConfig.backendPort);
+        final FrontendResource resource = new FrontendResource(
+                frontendConfig.backendHost,
+                frontendConfig.backendPort,
+                frontendConfig.traderHost,
+                frontendConfig.traderPort);
         environment.jersey().register(resource);
     }
 

@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "net.virtualviking.b3inject.examples.trader";
+option java_outer_classname = "Example";
+
+service Trader {
+    rpc makeTrade (TradeRequest) returns (Status) {}
+}
+
+message TradeRequest {
+    string symbol = 1;
+    int32 amount = 2;
+}
+
+message Status {
+    bool result = 1;
+}

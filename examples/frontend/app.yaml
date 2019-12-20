@@ -8,3 +8,6 @@ server:
 
 backendPort: 50051
 backendHost: "quoter"
+
+traderPort: 50052
+traderHost: "trader"
