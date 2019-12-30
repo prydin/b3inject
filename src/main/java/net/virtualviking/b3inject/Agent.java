@@ -28,11 +28,13 @@ import net.bytebuddy.utility.JavaModule;
 import net.virtualviking.b3inject.handlers.*;
 
 import java.lang.instrument.Instrumentation;
+import java.util.IdentityHashMap;
 
 import static net.bytebuddy.matcher.ElementMatchers.named;
 import static net.bytebuddy.matcher.ElementMatchers.none;
 
 public class Agent {
+    // public static IdentityHashMap<ClassLoader, Boolean> enhancedLoaders = new IdentityHashMap<>(); // Keep public to avoid access issues
 
     private static class DebugListener implements AgentBuilder.Listener {
         @Override
@@ -41,7 +43,7 @@ public class Agent {
 
         @Override
         public void onTransformation(TypeDescription typeDescription, ClassLoader classLoader, JavaModule javaModule, boolean b, DynamicType dynamicType) {
-            Logger.debug("Transforming class: " + typeDescription.getActualName());
+            System.out.println("Transforming class: " + typeDescription.getActualName() + " classloader: " + classLoader);
         }
 
         @Override
