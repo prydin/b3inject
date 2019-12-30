@@ -17,7 +17,6 @@ package net.virtualviking.b3inject.handlers;
 
 import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
-import net.bytebuddy.description.method.MethodDescription;
 import net.virtualviking.b3inject.Constants;
 import net.virtualviking.b3inject.Context;
 import net.virtualviking.b3inject.Logger;

@@ -16,10 +16,11 @@
 package net.virtualviking.b3inject.handlers;
 
 import net.bytebuddy.agent.builder.AgentBuilder;
-import static net.bytebuddy.matcher.ElementMatchers.*;
 import net.bytebuddy.asm.Advice;
 import net.virtualviking.b3inject.Logger;
 import net.virtualviking.b3inject.Matchers;
+
+import static net.bytebuddy.matcher.ElementMatchers.named;
 
 public class JettyIngressHandler {
     @Advice.OnMethodEnter

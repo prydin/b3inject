@@ -23,8 +23,6 @@ import net.bytebuddy.asm.Advice;
 
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
-import static net.bytebuddy.matcher.ElementMatchers.named;
-
 public class ServletFilterHandler {
     public static boolean filterAdded = false;
 

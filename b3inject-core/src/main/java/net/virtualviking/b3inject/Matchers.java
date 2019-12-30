@@ -4,6 +4,10 @@ import net.bytebuddy.description.NamedElement;
 import net.bytebuddy.description.method.MethodDescription;
 import net.bytebuddy.description.method.ParameterDescription;
 import net.bytebuddy.matcher.ElementMatcher;
+import org.apache.commons.io.filefilter.WildcardFileFilter;
+
+import java.io.File;
+
 /*
  *  Copyright 2019 Pontus Rydin
  *
@@ -19,9 +23,6 @@ import net.bytebuddy.matcher.ElementMatcher;
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-import org.apache.commons.io.filefilter.WildcardFileFilter;
-
-import java.io.File;
 
 public class Matchers {
     public static class WildcardMatcher extends ElementMatcher.Junction.AbstractBase<NamedElement> {

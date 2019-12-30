@@ -19,6 +19,7 @@ import net.bytebuddy.agent.builder.AgentBuilder;
 import net.bytebuddy.asm.Advice;
 import net.virtualviking.b3inject.Logger;
 import net.virtualviking.b3inject.Matchers;
+
 import static net.bytebuddy.matcher.ElementMatchers.*;
 
 public class ApacheEgressHandler {
