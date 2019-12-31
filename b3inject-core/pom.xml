@@ -37,12 +37,13 @@
             <groupId>io.grpc</groupId>
             <artifactId>grpc-api</artifactId>
             <version>1.25.0</version>
+            <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
-
 
     </dependencies>
 
-    <!--build>
+    <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -67,7 +68,7 @@
                 </executions>
             </plugin>
         </plugins>
-    </build -->
+    </build>
 
 
 </project>

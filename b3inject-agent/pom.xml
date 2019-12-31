@@ -29,7 +29,7 @@
             <resource>
                 <directory>${basedir}/../b3inject-core/target</directory>
                 <includes>
-                    <include>b3inject-*.jar</include>
+                    <include>b3inject-*-jar-with-dependencies.jar</include>
                     <include>${basedir}/src/main/resources</include>
                 </includes>
             </resource>

@@ -35,7 +35,9 @@ public class BootLoader {
             // Copy the core jar from the resources in the agent jar to a temporary directory so we
             // can append it to the boot classloader.
             File jarFile = File.createTempFile("b3inject-", ".jar");
-            try (InputStream rs = BootLoader.class.getClassLoader().getResourceAsStream("b3inject-core-1.0.1.jar")) {
+            System.err.println("Created temporary jarfile: " + jarFile.getAbsolutePath());
+           // jarFile.deleteOnExit();
+            try (InputStream rs = BootLoader.class.getClassLoader().getResourceAsStream("b3inject-core-1.0.1-jar-with-dependencies.jar")) {
                 try (OutputStream out = new FileOutputStream(jarFile)) {
                     byte[] buffer = new byte[1024 * 1024];
                     int n;
@@ -46,8 +48,8 @@ public class BootLoader {
             }
 
             // Add the newly created jar to the boot class path.
-      //      inst.appendToBootstrapClassLoaderSearch(new JarFile(jarFile));
-            inst.appendToSystemClassLoaderSearch(new JarFile(jarFile));
+            inst.appendToBootstrapClassLoaderSearch(new JarFile(jarFile));
+            // inst.appendToSystemClassLoaderSearch(new JarFile(jarFile));
 
 
             // Now use reflection to load the actual agent. This allows us to have zero dependencies to anything but

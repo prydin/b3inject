@@ -81,12 +81,6 @@ public class Agent {
         instrument(SpringEgressHandler.buildAgent(newBuilder()), inst);
         instrument(ApacheEgressHandler.buildAgent(newBuilder()), inst);
         instrument(JaxRsEgressHandler.buildAgent(newBuilder()), inst);
-      //  instrument(ServletFilterHandler.buildAgent(newBuilder()), inst);
-
-        // Some classloaders don't look at the system classloader. Hack them to do that!
-        newBuilder().type(named("org.eclipse.osgi.internal.loader.BundleLoader"))
-                .transform(new AgentBuilder.Transformer.ForAdvice()
-                    .advice(named("findClass"), ClassLoaderEnhancer.class.getName())).installOn(inst);
     }
 
     private static class ClassLoaderEnhancer {
